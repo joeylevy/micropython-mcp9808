@@ -25,7 +25,8 @@ class MCP9808(object):
         Initialize a sensor object on the given I2C bus and accessed by the
         given address.
         """
-        if i2c == None or i2c.__class__ != I2C:
+        #removed __class__ check since it doesn't work in 1.13
+        if i2c == None:
             raise ValueError('I2C object needed as argument!')
         self._i2c = i2c
         self._addr = addr
@@ -33,9 +34,11 @@ class MCP9808(object):
 
     def _send(self, buf):
         """
-        Sends the given bufer object over I2C to the sensor.
+        Sends the given buffer object over I2C to the sensor.
         """
-        self._i2c.send(buf, self._addr)
+        buf = bytes([buf])
+        #changed send to writeto with bytes
+        self._i2c.writeto(self._addr, buf)
 
     def _recv(self, n):
         """
@@ -43,7 +46,8 @@ class MCP9808(object):
         as an argument.
         Returns a bytearray containing the result.
         """
-        return self._i2c.recv(n, self._addr)
+        #changed recv to readfrom, swapped arguments
+        return self._i2c.readfrom(self._addr, n)
 
     def _check_device(self):
         """
@@ -120,3 +124,4 @@ class MCP9808(object):
         b.append(R_T_RES)
         b.append(r)
         self._send(b)
+
